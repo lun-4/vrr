@@ -19,6 +19,9 @@ struct funny_stream_loop_context {
   int size;
   uint8_t *picture_buf;
   AVFrame *pic;
+  int size2;
+  uint8_t *picture_buf2;
+  AVFrame *pic_rgb;
 };
 
 typedef struct funny_stream_loop_context funny_stream_loop_t;
@@ -93,13 +96,23 @@ static int funny_open(lua_State *L) {
       NULL);
 
   funny_stream->loop_ctx.size =
-      avpicture_get_size(AV_PIX_FMT_RGB24, funny_stream->ccontext->width,
+      avpicture_get_size(AV_PIX_FMT_YUV420P, funny_stream->ccontext->width,
                          funny_stream->ccontext->height);
   funny_stream->loop_ctx.picture_buf =
       (uint8_t *)(av_malloc(funny_stream->loop_ctx.size));
   funny_stream->loop_ctx.pic = av_frame_alloc();
   avpicture_fill((AVPicture *)funny_stream->loop_ctx.pic,
-                 funny_stream->loop_ctx.picture_buf, AV_PIX_FMT_RGB24,
+                 funny_stream->loop_ctx.picture_buf, AV_PIX_FMT_YUV420P,
+                 funny_stream->ccontext->width, funny_stream->ccontext->height);
+
+  funny_stream->loop_ctx.size2 =
+      avpicture_get_size(AV_PIX_FMT_RGB24, funny_stream->ccontext->width,
+                         funny_stream->ccontext->height);
+  funny_stream->loop_ctx.picture_buf2 =
+      (uint8_t *)(av_malloc(funny_stream->loop_ctx.size2));
+  funny_stream->loop_ctx.pic_rgb = av_frame_alloc();
+  avpicture_fill((AVPicture *)funny_stream->loop_ctx.pic_rgb,
+                 funny_stream->loop_ctx.picture_buf2, AV_PIX_FMT_RGB24,
                  funny_stream->ccontext->width, funny_stream->ccontext->height);
 
   printf("init done!\n");
@@ -155,14 +168,26 @@ static int funny_fetch_frame(lua_State *L) {
     int check = 0;
     funny_stream->loop_ctx.packet.stream_index =
         funny_stream->loop_ctx.stream->id;
-    printf("decoding frame");
+    printf("decoding frame\n");
     int result = avcodec_decode_video2(funny_stream->ccontext,
                                        funny_stream->loop_ctx.pic, &check,
                                        &funny_stream->loop_ctx.packet);
-    printf("got %d bytes. check %d\n", result, check);
+    printf("decoded %d bytes. check %d\n", result, check);
 
-    memcpy(blob_ptr, funny_stream->loop_ctx.picture_buf,
-           funny_stream->loop_ctx.size);
+    // frame!!!
+    if (check != 0) {
+
+      sws_scale(funny_stream->img_convert_ctx, funny_stream->loop_ctx.pic->data,
+                funny_stream->loop_ctx.pic->linesize, 0,
+                funny_stream->ccontext->height,
+                funny_stream->loop_ctx.pic_rgb->data,
+                funny_stream->loop_ctx.pic_rgb->linesize);
+
+      printf("width %d height %d\n", funny_stream->ccontext->width,
+             funny_stream->ccontext->height);
+      memcpy(blob_ptr, funny_stream->loop_ctx.picture_buf2,
+             funny_stream->loop_ctx.size2);
+    }
   }
 
   av_free_packet(&funny_stream->loop_ctx.packet);
