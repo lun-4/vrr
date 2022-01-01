@@ -39,17 +39,17 @@ function lovr.load()
 end
 
 function lovr.update()
-    local blob = ctx.image:getBlob()
-    local blob_ptr = blob:getPointer()
+    --local blob = ctx.image:getBlob()
+    --local blob_ptr = blob:getPointer()
 
-    local message = ctx.media_out_channel:pop()
-    if message ~= nil then
-        local mtype, mdata = message
-        print('message', mtype, mdata)
-        if mtype == 'frame' then
-            ctx.image:paste(mdata)
-        end
-    end
+    --local message = ctx.media_out_channel:pop()
+    --if message ~= nil then
+    --    local mtype, mdata = message
+    --    print('message', mtype, mdata)
+    --    if mtype == 'frame' then
+    --        ctx.image:paste(mdata)
+    --    end
+    --end
 end
 
 function lovr.draw()
@@ -62,6 +62,7 @@ function lovr.draw()
     -- for i=0,50 do
     --     ctx.image:setPixel(30, 30 + i, 1, 1, 1)
     -- end
+    print('original', ctx.image:getBlob():getPointer())
     ctx.texture:replacePixels(ctx.image)
     lovr.graphics.plane(ctx.material, 0, 1.4, -2, 1.77, 1)
     --lovr.graphics.print("connecting", 0, 1.4, -2, 0.5)
