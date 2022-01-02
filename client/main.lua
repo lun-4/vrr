@@ -62,9 +62,8 @@ function lovr.draw()
     -- for i=0,50 do
     --     ctx.image:setPixel(30, 30 + i, 1, 1, 1)
     -- end
-    print('original', ctx.image:getBlob():getPointer())
     ctx.texture:replacePixels(ctx.image)
-    lovr.graphics.plane(ctx.material, 0, 1.4, -2, 1.77, 1)
+    lovr.graphics.plane(ctx.material, 0, 1.4, -2, 1.77, 1, math.pi, 1, 0, 0)
     --lovr.graphics.print("connecting", 0, 1.4, -2, 0.5)
 end
 
