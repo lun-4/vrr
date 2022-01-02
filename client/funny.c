@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include <lauxlib.h>
 #include <lua.h>
@@ -130,6 +131,9 @@ static int funny_clean(lua_State *L) {
 }
 
 static int funny_fetch_frame(lua_State *L) {
+  struct timespec begin, end;
+  clock_gettime(CLOCK_MONOTONIC, &begin);
+
   printf("fetch frame!\n");
   if (lua_gettop(L) != 2) {
     return luaL_error(L, "expecting exactly 2 arguments");
@@ -192,6 +196,15 @@ static int funny_fetch_frame(lua_State *L) {
 
   av_free_packet(&funny_stream->loop_ctx.packet);
   av_init_packet(&funny_stream->loop_ctx.packet);
+
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  long seconds = end.tv_sec - begin.tv_sec;
+  long nanoseconds = end.tv_nsec - begin.tv_nsec;
+  double elapsed = seconds + nanoseconds * 1e-9;
+
+  lua_pushnumber(L, elapsed);
+  return 1;
 }
 
 static const luaL_Reg syslib[] = {
