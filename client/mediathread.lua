@@ -25,10 +25,14 @@ while true do
 
     local delta = fps_budget - frame_time
 
-    print('timings',fps_budget, frame_time, delta)
+    print('timings', fps_budget, frame_time, delta)
 
     if delta > 0 then
-        -- sleep in this thread so that we don't do extraneous fetches
+        -- good case: we decoded fast
+        -- we can sleep the rest of the ms knowing we're on 60fps target
         lovr.timer.sleep(delta)
+    elseif delta < 0 then
+        -- bad case, we decoded slow
+        print('shit!')
     end
 end
