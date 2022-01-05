@@ -9,7 +9,13 @@ function lovr.load()
 
     ctx.media_in_channel = lovr.thread.getChannel('media_in')
     ctx.media_out_channel = lovr.thread.getChannel('media_out')
-    local media_thread_code = lovr.filesystem.read('./mediathread.lua')
+    lovr.filesystem.setRequirePath('?.lua;?/init.lua;lib?.lua')
+    local ret = lovr.filesystem.read('mediathread.lua')
+    if ret == nil then
+        print('failed to load mediathread.lua')
+    end
+    local media_thread_code, media_thread_bytes = ret
+    print(media_thread_bytes, 'bytes for media thread code')
     ctx.thread = lovr.thread.newThread(media_thread_code)
     ctx.media_in_channel:push(ctx.image)
     ctx.thread:start()
