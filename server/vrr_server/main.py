@@ -26,7 +26,7 @@ class StreamContext:
 # TODO find proper width and height of monitors separately
 async def setup_frame_sending(width, height):
     ffmpeg_cmdline = (
-        f"ffmpeg -video_size 1366x768 -framerate 60 -f x11grab -i :0.0 -c:v libx264 -preset ultrafast -tune zerolatency -f rtsp -rtsp_transport udp rtsp://localhost:8554/live.sdp",
+        f"ffmpeg -video_size 1366x768 -framerate 45 -f x11grab -i :0.0 -c:v libx264 -preset fast -tune zerolatency -b:v 15M -maxrate 15M -bufsize 10M -crf 18 -f rtsp -rtsp_transport udp rtsp://localhost:8554/live.sdp",
     )
     print("ffmpeg cmd", ffmpeg_cmdline)
 
