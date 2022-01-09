@@ -18,7 +18,7 @@ def send(conn, opcode):
 
 @dataclass
 class StreamContext:
-    process: List[Any]
+    processes: List[Any]
     width: int
     height: int
     tick: int = 0
