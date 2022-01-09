@@ -26,9 +26,10 @@ class StreamContext:
 
 # TODO find proper width and height of monitors separately
 async def setup_frame_sending(width, height):
+    ffmpeg_params = "-vaapi_device /dev/dri/renderD128 -vf 'format=nv12,hwupload' -c:v h264_vaapi -preset fast -tune zerolatency -crf 18"
     ffmpeg_cmdlines = (
-        f"ffmpeg -video_size 1366x768 -framerate 45 -f x11grab -i :0.0 -c:v libx264 -preset fast -tune zerolatency -b:v 15M -maxrate 15M -bufsize 10M -crf 18 -f rtsp -rtsp_transport udp rtsp://localhost:8554/screen_1.sdp",
-        f"ffmpeg -video_size 1080x1920 -framerate 45 -f x11grab -i :0.0+1366,0 -c:v libx264 -preset fast -tune zerolatency -b:v 15M -maxrate 15M -bufsize 10M -crf 18 -f rtsp -rtsp_transport udp rtsp://localhost:8554/screen_2.sdp",
+        f"ffmpeg -video_size 1366x768 -framerate 45 -f x11grab -i :0.0 {ffmpeg_params} -f rtsp -rtsp_transport udp rtsp://localhost:8554/screen_1.sdp",
+        f"ffmpeg -video_size 1080x1920 -framerate 45 -f x11grab -i :0.0+1366,0 {ffmpeg_params} -f rtsp -rtsp_transport udp rtsp://localhost:8554/screen_2.sdp",
     )
     print("ffmpeg cmd", ffmpeg_cmdlines)
 
