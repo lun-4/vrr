@@ -3,22 +3,36 @@ local socket = require("socket")
 ctx = {}
 
 function lovr.load()
-    ctx.image = lovr.data.newImage(1366, 768, 'rgb', nil)
-    ctx.texture = lovr.graphics.newTexture(ctx.image, {type='2d', msaa=0, mipmaps=false})
-    ctx.material = lovr.graphics.newMaterial(ctx.texture)
+    ctx.image_1 = lovr.data.newImage(1366, 768, 'rgb', nil)
+    ctx.texture_1 = lovr.graphics.newTexture(ctx.image_1, {type='2d', msaa=0, mipmaps=false})
+    ctx.material_1 = lovr.graphics.newMaterial(ctx.texture_1)
 
-    ctx.media_in_channel = lovr.thread.getChannel('media_in')
-    ctx.media_out_channel = lovr.thread.getChannel('media_out')
-    lovr.filesystem.setRequirePath('?.lua;?/init.lua;lib?.lua')
+    ctx.image_2 = lovr.data.newImage(1080, 1920, 'rgb', nil)
+    ctx.texture_2 = lovr.graphics.newTexture(ctx.image_2, {type='2d', msaa=0, mipmaps=false})
+    ctx.material_2 = lovr.graphics.newMaterial(ctx.texture_2)
+
+    ctx.screen_1_in = lovr.thread.getChannel('screen_1_in')
+    ctx.screen_2_in = lovr.thread.getChannel('screen_2_in')
+    ctx.coordinator_channel = lovr.thread.getChannel('coordinator')
+
     local ret = lovr.filesystem.read('mediathread.lua')
     if ret == nil then
         print('failed to load mediathread.lua')
     end
     local media_thread_code, media_thread_bytes = ret
     print(media_thread_bytes, 'bytes for media thread code')
-    ctx.thread = lovr.thread.newThread(media_thread_code)
-    ctx.media_in_channel:push(ctx.image)
-    ctx.thread:start()
+    ctx.thread_1 = lovr.thread.newThread(media_thread_code)
+    ctx.coordinator_channel:push("screen_1")
+    ctx.thread_1:start()
+    ctx.thread_2 = lovr.thread.newThread(media_thread_code)
+    ctx.coordinator_channel:push("screen_2")
+    ctx.thread_2:start()
+
+    ctx.screen_1_in:push('rtsp://192.168.0.237:8554/screen_1.sdp')
+    ctx.screen_1_in:push(ctx.image_1)
+    ctx.screen_2_in:push('rtsp://192.168.0.237:8554/screen_2.sdp')
+    ctx.screen_2_in:push(ctx.image_2)
+    
   floor_shader = lovr.graphics.newShader([[
     vec4 position(mat4 projection, mat4 transform, vec4 vertex) {
       return projection * transform * vertex;
@@ -68,9 +82,10 @@ function lovr.draw()
     -- for i=0,50 do
     --     ctx.image:setPixel(30, 30 + i, 1, 1, 1)
     -- end
-    ctx.texture:replacePixels(ctx.image)
-    lovr.graphics.plane(ctx.material, 0, 1.4, -2, 1.77, 1, math.pi, 1, 0, 0)
-    --lovr.graphics.print("connecting", 0, 1.4, -2, 0.5)
+    ctx.texture_1:replacePixels(ctx.image_1)
+    ctx.texture_2:replacePixels(ctx.image_2)
+    lovr.graphics.plane(ctx.material_1, 0, 1.4, -2, 1.77, 1, math.pi, 1, 0, 0)
+    lovr.graphics.plane(ctx.material_2, 0, 3, -2, 1.77, 1, math.pi, 1, 0, 0)
 end
 
 

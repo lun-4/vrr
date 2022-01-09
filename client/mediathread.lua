@@ -3,17 +3,26 @@ local lovr = {
     data = require 'lovr.data',
     timer = require 'lovr.timer'
 }
-local in_channel = lovr.thread.getChannel('media_in')
-local out_channel = lovr.thread.getChannel('media_out')
 local funny = require 'funny'
 
+local coordinator = lovr.thread.getChannel('coordinator')
+-- TODO logging thread everyone spits stuff to
+--  TODO lovr channels do have a mutex on them, right?
 print('welcome to chillis')
-local image = in_channel:pop(true)
+local thread_id = coordinator:pop(true)
+print('thread id', thread_id)
 
-print('initial image ref', out_image)
+local in_channel = lovr.thread.getChannel(thread_id..'_in')
+local out_channel = lovr.thread.getChannel(thread_id..'_out')
+
+local rtsp_url = in_channel:pop(true)
+print('rtsp url', thread_id, rtsp_url)
+
+local image = in_channel:pop(true)
+print('image ref', thread_id, image)
 
 out_channel:push('waiting')
-local stream = funny.open('rtsp://localhost:8554/live.sdp')
+local stream = funny.open(rtsp_url)
 out_channel:push('ok')
 
 local FPS_TARGET = 60

@@ -4,6 +4,7 @@ import ffmpeg
 from PIL import ImageGrab
 from PIL.Image import _getencoder
 from dataclasses import dataclass
+from typing import List, Any
 import numpy as np
 
 
@@ -17,7 +18,7 @@ def send(conn, opcode):
 
 @dataclass
 class StreamContext:
-    process: str
+    process: List[Any]
     width: int
     height: int
     tick: int = 0
@@ -25,28 +26,23 @@ class StreamContext:
 
 # TODO find proper width and height of monitors separately
 async def setup_frame_sending(width, height):
-    ffmpeg_cmdline = (
-        f"ffmpeg -video_size 1366x768 -framerate 45 -f x11grab -i :0.0 -c:v libx264 -preset fast -tune zerolatency -b:v 15M -maxrate 15M -bufsize 10M -crf 18 -f rtsp -rtsp_transport udp rtsp://localhost:8554/live.sdp",
+    ffmpeg_cmdlines = (
+        f"ffmpeg -video_size 1366x768 -framerate 45 -f x11grab -i :0.0 -c:v libx264 -preset fast -tune zerolatency -b:v 15M -maxrate 15M -bufsize 10M -crf 18 -f rtsp -rtsp_transport udp rtsp://localhost:8554/screen_1.sdp",
+        f"ffmpeg -video_size 1080x1920 -framerate 45 -f x11grab -i :0.0+1366,0 -c:v libx264 -preset fast -tune zerolatency -b:v 15M -maxrate 15M -bufsize 10M -crf 18 -f rtsp -rtsp_transport udp rtsp://localhost:8554/screen_2.sdp",
     )
-    print("ffmpeg cmd", ffmpeg_cmdline)
+    print("ffmpeg cmd", ffmpeg_cmdlines)
 
-    # ffmpeg_cmdline = (
-    #     ffmpeg.input(
-    #         "pipe:", format="png", s=f"{width}x{height}", r=10, pix_fmt="rgb8"
-    #     )
-    #     .output("pipe:", format="mjpeg", pix_fmt="yuvj420p")
-    #     .compile()
-    # )
+    processes = []
 
-    process = await asyncio.create_subprocess_shell(
-        " ".join(ffmpeg_cmdline),
-        # stderr=asyncio.subprocess.PIPE,
-        stdout=asyncio.subprocess.PIPE,
-        stdin=asyncio.subprocess.PIPE,
-    )
+    for cmdline in ffmpeg_cmdlines:
+        processes.append(
+            await asyncio.create_subprocess_shell(
+                cmdline,
+            )
+        )
 
     return StreamContext(
-        process,
+        processes,
         width,
         height,
     )
@@ -81,20 +77,15 @@ async def capture_frame(ctx) -> bytes:
 
 
 async def amain():
-    # sock = socket.create_server(("", 9696), reuse_port=True)
-    # print("waiting for client")
-    # conn, address = sock.accept()
-    # print("connected", address)
-    # send(conn, OpCode.HELLO)
-
-    # img = ImageGrab.grab()
-    # width, height = img.width, img.height
     ctx = await setup_frame_sending(-1, -1)
     try:
-        out, err = await ctx.process.communicate()
-        print(out, err)
+        coros = []
+        for proc in ctx.processes:
+            coros.append(proc.wait())
+        await asyncio.wait(coros)
     finally:
-        await ctx.process.kill()
+        for proc in ctx.processes:
+            await proc.kill()
 
 
 def main():
