@@ -4,22 +4,25 @@ local lovr = {
     timer = require 'lovr.timer'
 }
 local funny = require 'funny'
+local loglib = require 'log'
+
+local log = loglib.Logger:new('media')
 
 local coordinator = lovr.thread.getChannel('coordinator')
--- TODO logging thread everyone spits stuff to
---  TODO lovr channels do have a mutex on them, right?
-print('welcome to chillis')
+log:info('media thread start')
 local thread_id = coordinator:pop(true)
-print('thread id', thread_id)
+log:info('received thread id: %s', thread_id)
+
+log = loglib.Logger:new(thread_id)
 
 local in_channel = lovr.thread.getChannel(thread_id..'_in')
 local out_channel = lovr.thread.getChannel(thread_id..'_out')
 
 local rtsp_url = in_channel:pop(true)
-print('rtsp url', thread_id, rtsp_url)
+log:info('rtsp url %s', rtsp_url)
 
 local image = in_channel:pop(true)
-print('image ref', thread_id, image)
+log:info('image ref %s', image)
 
 out_channel:push('waiting')
 local stream = funny.open(rtsp_url)
@@ -29,12 +32,12 @@ local FPS_TARGET = 60
 local fps_budget = (1 / FPS_TARGET)
 
 while true do
-    print('frame time!', stream, image)
+    log:info('frame time!', stream, image)
     local frame_time = funny.fetchFrame(stream, image:getBlob():getPointer())
 
     local delta = fps_budget - frame_time
 
-    print('timings', fps_budget, frame_time, delta)
+    log:info('timings %f %f %f',fps_budget, frame_time, delta)
 
     if delta > 0 then
         -- good case: we decoded fast
@@ -42,6 +45,6 @@ while true do
         lovr.timer.sleep(delta)
     elseif delta < 0 then
         -- bad case, we decoded slow
-        print('shit!')
+        log:info('timings are shit!')
     end
 end

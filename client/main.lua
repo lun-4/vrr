@@ -1,8 +1,15 @@
 local socket = require("socket")
+local loglib = require('log')
 
 ctx = {}
 
 function lovr.load()
+    local log_thread = loglib.startLogThread()
+    if log_thread == nil then
+        print('logs were unable to be loaded')
+        lovr.event.quit(1)
+    end
+
     ctx.image_1 = lovr.data.newImage(1366, 768, 'rgb', nil)
     ctx.texture_1 = lovr.graphics.newTexture(ctx.image_1, {type='2d', msaa=0, mipmaps=false})
     ctx.material_1 = lovr.graphics.newMaterial(ctx.texture_1)
