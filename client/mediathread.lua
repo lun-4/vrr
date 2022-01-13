@@ -28,7 +28,7 @@ out_channel:push('waiting')
 local stream = funny.open(rtsp_url)
 out_channel:push('ok')
 
-local FPS_TARGET = 60
+local FPS_TARGET = 45
 local fps_budget = (1 / FPS_TARGET)
 
 while true do
