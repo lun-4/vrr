@@ -92,7 +92,7 @@ function lovr.draw()
     ctx.texture_1:replacePixels(ctx.image_1)
     ctx.texture_2:replacePixels(ctx.image_2)
     lovr.graphics.plane(ctx.material_1, 0, 1.4, -2, 1.77, 1, math.pi, 1, 0, 0)
-    lovr.graphics.plane(ctx.material_2, 0, 3, -2, 1.77, 1, math.pi, 1, 0, 0)
+    lovr.graphics.plane(ctx.material_2, 1.56, 1.4, -2, 1.125, 2, math.pi, 1, 0, 0)
 end
 
 
