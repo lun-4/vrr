@@ -1,4 +1,5 @@
-local socket = require("socket")
+--local socket = require("socket")
+local lovr = require('lovr')
 local loglib = require('log')
 
 ctx = {}
@@ -33,12 +34,12 @@ function lovr.load()
     ctx.thread_1:start()
     ctx.thread_2 = lovr.thread.newThread(media_thread_code)
     ctx.coordinator_channel:push("screen_2")
-    ctx.thread_2:start()
+    --ctx.thread_2:start()
 
     ctx.screen_1_in:push('rtsp://192.168.0.237:8554/screen_1.sdp')
     ctx.screen_1_in:push(ctx.image_1)
-    ctx.screen_2_in:push('rtsp://192.168.0.237:8554/screen_2.sdp')
-    ctx.screen_2_in:push(ctx.image_2)
+    --ctx.screen_2_in:push('rtsp://192.168.0.237:8554/screen_2.sdp')
+    --ctx.screen_2_in:push(ctx.image_2)
     
   floor_shader = lovr.graphics.newShader([[
     vec4 position(mat4 projection, mat4 transform, vec4 vertex) {
