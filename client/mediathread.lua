@@ -1,9 +1,11 @@
 local lovr = {
     thread = require 'lovr.thread',
     data = require 'lovr.data',
-    timer = require 'lovr.timer'
+    timer = require 'lovr.timer',
+    filesystem = require 'lovr.filesystem'
 }
-local funny = require 'funny'
+
+local funny = require 'rtsp'
 local loglib = require 'log'
 
 local log = loglib.Logger:new('media')
