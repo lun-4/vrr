@@ -2,6 +2,10 @@
 local lovr = require('lovr')
 local loglib = require('log')
 
+
+local Window = require 'window'
+local Floor = require 'floor'
+
 ctx = {
     last_controller_position = {
         left = nil,
@@ -13,6 +17,16 @@ ctx = {
         right = true,
     }
 }
+
+ctx.windows = {
+    screen_1 = Window({
+        position = {0, 1.5, -3},
+        size = {3.55, 2},
+        rotation = {math.pi, 1, 0, 0},
+    })
+}
+
+ctx.floor = Floor()
 
 function lovr.load()
     local log_thread = loglib.startLogThread()
@@ -58,30 +72,6 @@ function lovr.load()
     ctx.screen_1_in:push(ctx.image_1)
     --ctx.screen_2_in:push('rtsp://192.168.0.237:8554/screen_2.sdp')
     --ctx.screen_2_in:push(ctx.image_2)
-    
-  floor_shader = lovr.graphics.newShader([[
-    vec4 position(mat4 projection, mat4 transform, vec4 vertex) {
-      return projection * transform * vertex;
-    }
-  ]], [[
-    const float gridSize = 25.;
-    const float cellSize = .5;
-
-    vec4 color(vec4 gcolor, sampler2D image, vec2 uv) {
-
-      // Distance-based alpha (1. at the middle, 0. at edges)
-      float alpha = 1. - smoothstep(.15, .50, distance(uv, vec2(.5)));
-
-      // Grid coordinate
-      uv *= gridSize;
-      uv /= cellSize;
-      vec2 c = abs(fract(uv - .5) - .5) / fwidth(uv);
-      float line = clamp(1. - min(c.x, c.y), 0., 1.);
-      vec3 value = mix(vec3(.01, .01, .011), (vec3(.04)), line);
-
-      return vec4(vec3(value), alpha);
-    }
-  ]], { flags = { highp = true } })
 end
 
 function lovr.update()
@@ -125,49 +115,14 @@ function lovr.update()
             end
         end
     end
-
-    --local blob = ctx.image:getBlob()
-    --local blob_ptr = blob:getPointer()
-
-    --local message = ctx.media_out_channel:pop()
-    --if message ~= nil then
-    --    local mtype, mdata = message
-    --    print('message', mtype, mdata)
-    --    if mtype == 'frame' then
-    --        ctx.image:paste(mdata)
-    --    end
-    --end
 end
 
-local Window = require 'window'
-
-ctx.windows = {
-    screen_1 = Window({
-        position = {0, 1.5, -3},
-        size = {3.55, 2},
-        rotation = {math.pi, 1, 0, 0},
-    })
-}
-
-
-
 function lovr.draw()
-    lovr.graphics.setShader(floor_shader)
-    lovr.graphics.plane('fill', 0, 0, 0, 25, 25, -math.pi / 2, 1, 0, 0)
-    lovr.graphics.setShader()
-    -- for i=0,700,1 do
-    --     ctx.image:setPixel(30 + i, 30 + i, 1, 1, 1)
-    -- end
-    -- for i=0,50 do
-    --     ctx.image:setPixel(30, 30 + i, 1, 1, 1)
-    -- end
-    ctx.texture_1:replacePixels(ctx.image_1)
-    --ctx.texture_2:replacePixels(ctx.image_2)
+    ctx.floor:draw()
 
-    lovr.graphics.plane(
-        ctx.material_1,
-        unpack(ctx.windows.screen_1._draw_args)
-    )
+    -- for each screen, we need to replacePixels
+    ctx.texture_1:replacePixels(ctx.image_1)
+    ctx.windows.screen_1:draw(ctx.material_1)
 
     --lovr.graphics.plane(ctx.material_2, 1.56, 1.4, -2, 1.125, 2, math.pi, 1, 0, 0)
 
@@ -177,7 +132,6 @@ function lovr.draw()
         end
     end
 end
-
 
 --[[
 
