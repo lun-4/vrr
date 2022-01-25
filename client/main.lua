@@ -91,8 +91,6 @@ function lovr.update()
             local pose = {lovr.headset.getPose(hand)}
             local current_position = vec3(pose[1], pose[2], pose[3])
             local last_position = ctx.last_controller_position[hand]
-            print('cur', current_position:unpack())
-            print('last', last_position)
             if last_position == nil then
                 print('new position!', current_position:unpack())
                 ctx.last_controller_position[hand] = {
@@ -103,8 +101,6 @@ function lovr.update()
                 local delta_vec = current_position:sub(vec3(unpack(last_position[2])))
                 local dx, dy, dz = delta_vec:unpack()
                 local average_delta = (dx+dy+dz / 3)
-                print('delta_vec', delta_vec:unpack())
-                print('avg', average_delta)
 
                 -- movement detected
                 if average_delta > 0.1 then
@@ -119,13 +115,10 @@ function lovr.update()
                 else
                     local last_timestamp = last_position[1]
                     local current_timestamp = lovr.timer.getTime()
-                    print('checking last ts!', last_timestamp, current_timestamp)
 
                     local delta = current_timestamp - last_timestamp
-                    print('inactive delta', delta)
 
                     if delta > 3 and ctx.active_controller[hand] then
-                        print(hand, 'inactive')
                         ctx.active_controller[hand] = false
                     end
                 end
@@ -146,6 +139,18 @@ function lovr.update()
     --end
 end
 
+local Window = require 'window'
+
+ctx.windows = {
+    screen_1 = Window({
+        position = {0, 1.5, -3},
+        size = {3.55, 2},
+        rotation = {math.pi, 1, 0, 0},
+    })
+}
+
+
+
 function lovr.draw()
     lovr.graphics.setShader(floor_shader)
     lovr.graphics.plane('fill', 0, 0, 0, 25, 25, -math.pi / 2, 1, 0, 0)
@@ -158,7 +163,12 @@ function lovr.draw()
     -- end
     ctx.texture_1:replacePixels(ctx.image_1)
     --ctx.texture_2:replacePixels(ctx.image_2)
-    lovr.graphics.plane(ctx.material_1, 0, 1.5, -3, 3.55, 2, math.pi, 1, 0, 0)
+
+    lovr.graphics.plane(
+        ctx.material_1,
+        unpack(ctx.windows.screen_1._draw_args)
+    )
+
     --lovr.graphics.plane(ctx.material_2, 1.56, 1.4, -2, 1.125, 2, math.pi, 1, 0, 0)
 
     for hand, model in pairs(ctx.models) do
