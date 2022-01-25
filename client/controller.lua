@@ -1,0 +1,82 @@
+require 'pl'
+
+class.Controller()
+
+function Controller:_init(hand)
+    self.hand = hand
+    self.last_position = nil
+    self.active = true
+    self.model = nil
+end
+
+function Controller:onLoad()
+    -- TODO use maybe a ball if desktop?
+    if lovr.headset.getDriver() == "desktop" then
+        return
+    end
+
+    self.model = lovr.graphics.newModel('./quest2_'..self.hand..'_hand.glb')
+end
+
+function Controller:newPosition(new_vec3_table)
+    print(self.hand, 'new position!', unpack(new_vec3_table))
+    self.last_position = {
+        timestamp = lovr.timer.getTime(),
+        vector = new_vec3_table,
+    }
+
+    -- new positions always mean active
+    self.active = true
+end
+
+function Controller:onUpdate(dt)
+    if lovr.headset.isTracked(hand) then
+        self.active = false
+        return
+    end
+
+    local pose = {lovr.headset.getPose(hand)}
+    local pose_position_table = {pose[1], pose[2], pose[3]}
+    local current_position = vec3(pose_position_table:unpack())
+    if self.last_position == nil then
+        self:newPosition(pose_position_table)
+    else
+        -- compare current and last by subtracting them up
+        -- and checking the average delta change between them
+        --
+        -- this is done because two controller positions will never
+        -- be exact because
+        --
+        -- 1) float shenanigans
+        -- 2) the world exists and is never exact
+        local last_position_vec = vec3(unpack(self.last_position.vector))
+        local delta_vec = current_position:sub(last_position_vec)
+        local dx, dy, dz = delta_vec:unpack()
+        local average_delta = (dx + dy + dz / 3)
+
+        -- movement detected
+        if average_delta > 0.1 then
+            self:newPosition(pose_position_table)
+        else
+            local current_timestamp = lovr.timer.getTime()
+            local delta = current_timestamp - self.last_position.timestamp
+
+            -- no movement for 3 seconds, set inactive
+            if delta > 3 then
+                self.active = false
+            end
+        end
+    end
+end
+
+function Controller:draw()
+    if not self.active then
+        return
+    end
+
+    -- draw the true position given by headset, instead of last_position
+    -- (which could be updated by the time we want to draw the frame!)
+    self.model:draw(mat4(lovr.headset.getPose(self.hand)))
+end
+
+return Controller
