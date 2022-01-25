@@ -10,12 +10,9 @@ function Controller:_init(hand)
 end
 
 function Controller:onLoad()
-    -- TODO use maybe a ball if desktop?
-    if lovr.headset.getDriver() == "desktop" then
-        return
+    if lovr.headset.getDriver() ~= "desktop" then
+        self.model = lovr.graphics.newModel('./quest2_'..self.hand..'_hand.glb')
     end
-
-    self.model = lovr.graphics.newModel('./quest2_'..self.hand..'_hand.glb')
 end
 
 function Controller:newPosition(new_vec3_table)
@@ -30,14 +27,21 @@ function Controller:newPosition(new_vec3_table)
 end
 
 function Controller:onUpdate(dt)
-    if lovr.headset.isTracked(hand) then
+    -- do not apply controller calculations when the mouse's position
+    -- will always stay the same (weird stuff on the desktop simulator)
+    if lovr.headset.getDriver() == "desktop" then
+        self.active = true
+        return
+    end
+
+    if not lovr.headset.isTracked(self.hand) then
         self.active = false
         return
     end
 
     local pose = {lovr.headset.getPose(hand)}
     local pose_position_table = {pose[1], pose[2], pose[3]}
-    local current_position = vec3(pose_position_table:unpack())
+    local current_position = vec3(unpack(pose_position_table))
     if self.last_position == nil then
         self:newPosition(pose_position_table)
     else
@@ -76,7 +80,19 @@ function Controller:draw()
 
     -- draw the true position given by headset, instead of last_position
     -- (which could be updated by the time we want to draw the frame!)
-    self.model:draw(mat4(lovr.headset.getPose(self.hand)))
+    if self.model then
+        lovr.graphics.setColor(1, 1, 1, 1)
+        self.model:draw(mat4(lovr.headset.getPose(self.hand)))
+    else
+        local position = vec3(lovr.headset.getPosition(self.hand))
+        local direction = quat(lovr.headset.getOrientation(self.hand)):direction()
+
+        lovr.graphics.setColor(1, 1, 1)
+        lovr.graphics.sphere(position, .01)
+
+        lovr.graphics.setColor(1, 0, 0)
+        lovr.graphics.line(position, position + direction * 50)
+    end
 end
 
 return Controller
