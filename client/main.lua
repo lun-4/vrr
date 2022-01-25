@@ -11,16 +11,6 @@ ctx = {
     controllers = {
         left = Controller('left'),
         right = Controller('right'),
-    },
-
-    last_controller_position = {
-        left = nil,
-        right = nil,
-    },
-
-    active_controller = {
-        left = true,
-        right = true,
     }
 }
 
@@ -65,8 +55,8 @@ function lovr.load()
     ctx.thread_1 = lovr.thread.newThread(media_thread_code)
     ctx.coordinator_channel:push("screen_1")
     ctx.thread_1:start()
-    ctx.thread_2 = lovr.thread.newThread(media_thread_code)
-    ctx.coordinator_channel:push("screen_2")
+    --ctx.thread_2 = lovr.thread.newThread(media_thread_code)
+    --ctx.coordinator_channel:push("screen_2")
     --ctx.thread_2:start()
 
     ctx.screen_1_in:push('rtsp://192.168.0.237:8554/screen_1.sdp')
