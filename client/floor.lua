@@ -1,4 +1,4 @@
-require 'pl'
+require "pl"
 
 class.Floor()
 
@@ -25,12 +25,12 @@ function Floor:_init(args)
 
           return vec4(vec3(value), alpha);
         }
-    ]], { flags = { highp = true } })
+    ]], {flags = {highp = true}})
 end
 
 function Floor:draw()
     lovr.graphics.setShader(self.shader)
-    lovr.graphics.plane('fill', 0, 0, 0, 25, 25, -math.pi / 2, 1, 0, 0)
+    lovr.graphics.plane("fill", 0, 0, 0, 25, 25, -math.pi / 2, 1, 0, 0)
 end
 
 return Floor

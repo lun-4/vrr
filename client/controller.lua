@@ -1,4 +1,4 @@
-require 'pl'
+require "pl"
 
 class.Controller()
 
@@ -11,12 +11,13 @@ end
 
 function Controller:onLoad()
     if lovr.headset.getDriver() ~= "desktop" then
-        self.model = lovr.graphics.newModel('./quest2_'..self.hand..'_hand.glb')
+        self.model = lovr.graphics.newModel(
+            "./quest2_" .. self.hand .. "_hand.glb")
     end
 end
 
 function Controller:newPosition(new_vec3_table)
-    print(self.hand, 'new position!', unpack(new_vec3_table))
+    print(self.hand, "new position!", unpack(new_vec3_table))
     self.last_position = {
         timestamp = lovr.timer.getTime(),
         vector = new_vec3_table,
@@ -57,9 +58,10 @@ function Controller:onUpdate(dt)
         local delta_vec = current_position:sub(last_position_vec)
         local dx, dy, dz = delta_vec:unpack()
         local average_delta = (dx + dy + dz / 3)
+        print(self.hand, "avg", average_delta)
 
         -- movement detected
-        if average_delta > 0.1 then
+        if average_delta >= 0 then
             self:newPosition(pose_position_table)
         else
             local current_timestamp = lovr.timer.getTime()
@@ -85,7 +87,8 @@ function Controller:draw()
         self.model:draw(mat4(lovr.headset.getPose(self.hand)))
     else
         local position = vec3(lovr.headset.getPosition(self.hand))
-        local direction = quat(lovr.headset.getOrientation(self.hand)):direction()
+        local direction =
+            quat(lovr.headset.getOrientation(self.hand)):direction()
 
         lovr.graphics.setColor(1, 1, 1)
         lovr.graphics.sphere(position, .01)
