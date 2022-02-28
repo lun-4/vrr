@@ -22,6 +22,9 @@ if i forget.
 
 ## setup (server-side)
 
+BROKEN BUILD AHEAD: NEEDS MORE CARE (like how to fetch the quest 2 3d models,
+or getting penlight into this repo. all is cursed, will not work on anything).
+
 TODO actually make urls configurable. this doesn't work
 
 - python 3.10
