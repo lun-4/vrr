@@ -12,7 +12,7 @@ end
 function Controller:onLoad()
     if lovr.headset.getDriver() ~= "desktop" then
         self.model = lovr.graphics.newModel(
-            "./quest2_" .. self.hand .. "_hand.glb")
+            "quest2_" .. self.hand .. "_hand.glb")
     end
 end
 
