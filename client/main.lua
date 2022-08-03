@@ -78,6 +78,7 @@ function lovr.draw()
     ctx.floor:draw()
 
     -- for each screen, we need to replacePixels
+    lovr.graphics.setShader()
     ctx.canvas_1:getTexture():replacePixels(ctx.image_1)
     ctx.windows.screen_1:draw(ctx.material_1)
 
@@ -91,79 +92,3 @@ end
 function lovr.log(message, level, tag)
     print("lovr.log", tag, level, message)
 end
-
---[[
-
-scenes = {
-    connection_start = 0,
-    connection_loading = 1,
-    wait_screen = 2,
-    connection_error = 3,
-    main = 4
-}
-
-OpCode = {
-    HELLO = 1
-}
-
-ctx = {
-    scene = nil,
-    state = {}
-}
-
-local function receive_message(sock)
-    print(sock)
-    local opcode = sock:receive(4)
-    if opcode == nil then return nil end
-    print('recv raw op', opcode)
-    local actual_opcode = tonumber(opcode)
-    print('recv op', actual_opcode)
-    return {op = actual_opcode}
-end
-
-function lovr.load()
-    ctx.state.tcp = socket.tcp()
-end
-
-function lovr.update()
-    if ctx.scene == nil then
-        ctx.scene = scenes.connection_loading
-        print('attempting to connect')
-        local ok, err = ctx.state.tcp:connect("192.168.0.237", 9696)
-        ctx.state.sock = ok
-        ctx.state.sock_error = err
-        ctx.scene = scenes.connection_loading
-    elseif ctx.scene == scenes.connection_loading then
-        if ctx.state.sock == 1 then
-            -- we have a socket, receive a message!
-            local message = receive_message(ctx.state.tcp)
-            print('msg', message.op)
-            if message.op == OpCode.HELLO then
-                ctx.scene = scenes.wait_screen
-            end
-        else
-            -- no socket, what to do?
-        end
-    elseif ctx.scene == scenes.wait_screen then
-        -- local message = receive_message(ctx.state.tcp)
-        -- print('msg', message)
-        -- if message and message.op == OpCode.SCREEN then
-        --     ctx.scene = scenes.main
-        -- else
-        --     ctx.scene = scenes.connection_error
-        -- end
-    end
-end
-
-function lovr.draw()
-    if ctx.scene == nil then
-        lovr.graphics.print("connecting", 0, 1.4, -2, 0.5)
-    elseif ctx.scene == scenes.connection_loading then
-        lovr.graphics.print("ok? " .. tostring(ctx.state.sock), 0, 1.4, -4, 0.5)
-        lovr.graphics.print("err? " .. tostring(ctx.state.sock_error), 0, 0.5, -4, 0.5)
-    elseif ctx.scene == scenes.wait_screen then
-        lovr.graphics.print("waiting for screen data", 0, 0.5, -4, 0.5)
-    end
-end
-
-]]

@@ -7,6 +7,7 @@ function Controller:_init(hand)
     self.last_position = nil
     self.active = true
     self.model = nil
+    self.shader = nil
 end
 
 function Controller:onLoad()
@@ -14,6 +15,8 @@ function Controller:onLoad()
         self.model = lovr.graphics.newModel(
             "quest2_" .. self.hand .. "_hand.glb")
     end
+
+    self.shader = lovr.graphics.newShader("standard", {})
 end
 
 function Controller:newPosition(new_vec3_table)
@@ -79,6 +82,8 @@ function Controller:draw()
     if not self.active then
         return
     end
+
+    lovr.graphics.setShader(self.shader)
 
     -- draw the true position given by headset, instead of last_position
     -- (which could be updated by the time we want to draw the frame!)
