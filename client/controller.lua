@@ -61,7 +61,6 @@ function Controller:onUpdate(dt)
         local delta_vec = current_position:sub(last_position_vec)
         local dx, dy, dz = delta_vec:unpack()
         local average_delta = (dx + dy + dz / 3)
-        print(self.hand, "avg", average_delta)
 
         -- movement detected
         if average_delta >= 0 then
