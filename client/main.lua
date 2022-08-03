@@ -28,13 +28,18 @@ function lovr.load()
     ctx.controllers.left:onLoad()
     ctx.controllers.right:onLoad()
 
+    max_msaa = lovr.graphics.getLimits().texturemsaa
     ctx.image_1 = lovr.data.newImage(1366, 768, "rgb", nil)
-    ctx.texture_1 = lovr.graphics.newTexture(ctx.image_1, {
-        type = "2d",
-        msaa = 8,
+    ctx.canvas_1 = lovr.graphics.newCanvas(1366, 768, {
+        format = "rgb",
+        stereo = false,
         mipmaps = false,
+        msaa = 8,
     })
-    ctx.material_1 = lovr.graphics.newMaterial(ctx.texture_1)
+    ctx.image_1 = ctx.canvas_1:newImage()
+    print("image fmt", ctx.image_1:getFormat())
+    ctx.material_1 = lovr.graphics.newMaterial(ctx.canvas_1:getTexture(), 1, 1,
+                                               1, 1)
 
     -- ctx.image_2 = lovr.data.newImage(1080, 1920, 'rgb', nil)
     -- ctx.texture_2 = lovr.graphics.newTexture(ctx.image_2, {type='2d', msaa=8, mipmaps=false})
@@ -73,7 +78,7 @@ function lovr.draw()
     ctx.floor:draw()
 
     -- for each screen, we need to replacePixels
-    ctx.texture_1:replacePixels(ctx.image_1)
+    ctx.canvas_1:getTexture():replacePixels(ctx.image_1)
     ctx.windows.screen_1:draw(ctx.material_1)
 
     -- lovr.graphics.plane(ctx.material_2, 1.56, 1.4, -2, 1.125, 2, math.pi, 1, 0, 0)
@@ -81,6 +86,10 @@ function lovr.draw()
     for _, controller in pairs(ctx.controllers) do
         controller:draw()
     end
+end
+
+function lovr.log(message, level, tag)
+    print("lovr.log", tag, level, message)
 end
 
 --[[

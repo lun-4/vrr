@@ -10,7 +10,7 @@ function Controller:_init(hand)
 end
 
 function Controller:onLoad()
-    if lovr.headset.getDriver() ~= "desktop" then
+    if lovr.headset ~= nil then
         self.model = lovr.graphics.newModel(
             "quest2_" .. self.hand .. "_hand.glb")
     end
@@ -30,7 +30,7 @@ end
 function Controller:onUpdate(dt)
     -- do not apply controller calculations when the mouse's position
     -- will always stay the same (weird stuff on the desktop simulator)
-    if lovr.headset.getDriver() == "desktop" then
+    if lovr.headset == nil then
         self.active = true
         return
     end
