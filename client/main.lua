@@ -14,6 +14,11 @@ ctx.windows = {
         size = {3.55, 2},
         rotation = {math.pi, 1, 0, 0},
     }),
+    screen_2 = Window({
+        position = {3, 2, -3},
+        size = {2.24, 4},
+        rotation = {math.pi, 1, 0, 0},
+    }),
 }
 
 ctx.floor = Floor()
@@ -28,8 +33,6 @@ function lovr.load()
     ctx.controllers.left:onLoad()
     ctx.controllers.right:onLoad()
 
-    max_msaa = lovr.graphics.getLimits().texturemsaa
-    ctx.image_1 = lovr.data.newImage(1366, 768, "rgb", nil)
     ctx.canvas_1 = lovr.graphics.newCanvas(1366, 768, {
         format = "rgb",
         stereo = false,
@@ -37,13 +40,18 @@ function lovr.load()
         msaa = 8,
     })
     ctx.image_1 = ctx.canvas_1:newImage()
-    print("image fmt", ctx.image_1:getFormat())
     ctx.material_1 = lovr.graphics.newMaterial(ctx.canvas_1:getTexture(), 1, 1,
                                                1, 1)
 
-    -- ctx.image_2 = lovr.data.newImage(1080, 1920, 'rgb', nil)
-    -- ctx.texture_2 = lovr.graphics.newTexture(ctx.image_2, {type='2d', msaa=8, mipmaps=false})
-    -- ctx.material_2 = lovr.graphics.newMaterial(ctx.texture_2)
+    ctx.canvas_2 = lovr.graphics.newCanvas(1080, 1920, {
+        format = "rgb",
+        stereo = false,
+        mipmaps = true,
+        msaa = 8,
+    })
+    ctx.image_2 = ctx.canvas_2:newImage()
+    ctx.material_2 = lovr.graphics.newMaterial(ctx.canvas_2:getTexture(), 1, 1,
+                                               1, 1)
 
     ctx.screen_1_in = lovr.thread.getChannel("screen_1_in")
     ctx.screen_2_in = lovr.thread.getChannel("screen_2_in")
@@ -58,14 +66,15 @@ function lovr.load()
     ctx.thread_1 = lovr.thread.newThread(media_thread_code)
     ctx.coordinator_channel:push("screen_1")
     ctx.thread_1:start()
-    -- ctx.thread_2 = lovr.thread.newThread(media_thread_code)
-    -- ctx.coordinator_channel:push("screen_2")
-    -- ctx.thread_2:start()
+    ctx.thread_2 = lovr.thread.newThread(media_thread_code)
+    ctx.coordinator_channel:push("screen_2")
+    ctx.thread_2:start()
 
     ctx.screen_1_in:push("rtsp://192.168.0.237:8554/screen_1.sdp")
     ctx.screen_1_in:push(ctx.image_1)
-    -- ctx.screen_2_in:push('rtsp://192.168.0.237:8554/screen_2.sdp')
-    -- ctx.screen_2_in:push(ctx.image_2)
+
+    ctx.screen_2_in:push("rtsp://192.168.0.237:8554/screen_2.sdp")
+    ctx.screen_2_in:push(ctx.image_2)
 end
 
 function lovr.update()
@@ -81,6 +90,9 @@ function lovr.draw()
     lovr.graphics.setShader()
     ctx.canvas_1:getTexture():replacePixels(ctx.image_1)
     ctx.windows.screen_1:draw(ctx.material_1)
+
+    ctx.canvas_2:getTexture():replacePixels(ctx.image_2)
+    ctx.windows.screen_2:draw(ctx.material_2)
 
     -- lovr.graphics.plane(ctx.material_2, 1.56, 1.4, -2, 1.125, 2, math.pi, 1, 0, 0)
 
