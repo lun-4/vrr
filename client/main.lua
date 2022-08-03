@@ -33,7 +33,7 @@ function lovr.load()
     ctx.canvas_1 = lovr.graphics.newCanvas(1366, 768, {
         format = "rgb",
         stereo = false,
-        mipmaps = false,
+        mipmaps = true,
         msaa = 8,
     })
     ctx.image_1 = ctx.canvas_1:newImage()
