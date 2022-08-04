@@ -20,7 +20,7 @@ function Controller:onLoad()
 end
 
 function Controller:newPosition(new_vec3_table)
-    print(self.hand, "new position!", unpack(new_vec3_table))
+    -- print(self.hand, "new position!", unpack(new_vec3_table))
     self.last_position = {
         timestamp = lovr.timer.getTime(),
         vector = new_vec3_table,

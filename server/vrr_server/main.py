@@ -33,6 +33,10 @@ async def setup_frame_sending(width, height):
         f"ffmpeg -video_size 1366x768 -framerate 30 -f x11grab -i :0.0 {ffmpeg_params} -f rtsp -rtsp_transport udp rtsp://localhost:8554/screen_1.sdp",
         f"ffmpeg -video_size 1080x1920 -framerate 30 -f x11grab -i :0.0+1366,0 {ffmpeg_params} -f rtsp -rtsp_transport udp rtsp://localhost:8554/screen_2.sdp",
     )
+
+    ffmpeg_cmdlines = (
+        f"ffmpeg -framerate 30 -f x11grab -i :0.0 {ffmpeg_params} -f rtsp -rtsp_transport udp rtsp://localhost:8554/screen.sdp",
+    )
     print("ffmpeg cmd", ffmpeg_cmdlines)
 
     processes = []
