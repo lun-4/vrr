@@ -45,18 +45,25 @@ end
 -- slices the main incoming frame into two screens that are fed
 -- to each image sequentially.
 for _, slice_description in ipairs(mysplit(slice_configuration, ";")) do
-    local splitted = mysplit(slice_description, ",")
-    local offset_x, offset_y, size_x, size_y = tonumber(splitted[1]),
-                                               tonumber(splitted[2]),
-                                               tonumber(splitted[3]),
-                                               tonumber(splitted[4])
+    if slice_description == "ALL" then
+        local debug_image = in_channel:pop(true)
+        rtsp.addDebugFrame(stream, debug_image:getBlob():getPointer())
+    else
 
-    local slice_image = in_channel:pop(true)
+        local splitted = mysplit(slice_description, ",")
+        local offset_x, offset_y, size_x, size_y = tonumber(splitted[1]),
+                                                   tonumber(splitted[2]),
+                                                   tonumber(splitted[3]),
+                                                   tonumber(splitted[4])
 
-    log:info("recv %d %d %d %d", offset_x, offset_y, size_x, size_y)
-    rtsp.addSlice(stream, offset_x, offset_y, size_x, size_y,
-                  slice_image:getBlob():getPointer())
-    log:info("slice ok")
+        local slice_image = in_channel:pop(true)
+
+        log:info("recv %d %d %d %d", offset_x, offset_y, size_x, size_y)
+        rtsp.addSlice(stream, offset_x, offset_y, size_x, size_y,
+                      slice_image:getBlob():getPointer())
+        log:info("slice ok")
+
+    end
 end
 
 log:info("starting main loop")

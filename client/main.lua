@@ -19,6 +19,11 @@ ctx.windows = {
         size = {2.24, 4},
         rotation = {math.pi, 1, 0, 0},
     }),
+    screen_3 = Window({
+        position = {0, 4, -4},
+        size = {2.547, 2},
+        rotation = {math.pi, 1, 0, 0},
+    }),
 }
 
 ctx.floor = Floor()
@@ -55,6 +60,16 @@ function lovr.load()
     ctx.material_2 = lovr.graphics.newMaterial(ctx.canvas_2:getTexture(), 1, 1,
                                                1, 1)
 
+    ctx.canvas_3 = lovr.graphics.newCanvas(2446, 1920, {
+        format = "rgb",
+        stereo = false,
+        mipmaps = true,
+        msaa = 8,
+    })
+    ctx.image_3 = ctx.canvas_3:newImage()
+    ctx.material_3 = lovr.graphics.newMaterial(ctx.canvas_3:getTexture(), 1, 1,
+                                               1, 1)
+
     if new_method then
         local coordinator_channel = lovr.thread.getChannel("coordinator")
 
@@ -71,9 +86,10 @@ function lovr.load()
         ctx.out_channel = lovr.thread.getChannel("media_out")
 
         ctx.in_channel:push("rtsp://192.168.0.237:8554/screen.sdp")
-        ctx.in_channel:push("0,0,1366,768;1366,0,1080,1920")
+        ctx.in_channel:push("0,0,1366,768;1366,0,1080,1920;ALL")
         ctx.in_channel:push(ctx.image_1)
         ctx.in_channel:push(ctx.image_2)
+        ctx.in_channel:push(ctx.image_3) -- holds it for debugging
     else
         ctx.screen_1_in = lovr.thread.getChannel("screen_1_in")
         ctx.screen_2_in = lovr.thread.getChannel("screen_2_in")
@@ -116,6 +132,9 @@ function lovr.draw()
 
     ctx.canvas_2:getTexture():replacePixels(ctx.image_2)
     ctx.windows.screen_2:draw(ctx.material_2)
+
+    ctx.canvas_3:getTexture():replacePixels(ctx.image_3)
+    ctx.windows.screen_3:draw(ctx.material_3)
 
     -- lovr.graphics.plane(ctx.material_2, 1.56, 1.4, -2, 1.125, 2, math.pi, 1, 0, 0)
 
