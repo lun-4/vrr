@@ -7,22 +7,20 @@ function Window:_init(args)
     self.hover = false
     self.active = false
 
-    self.position = args.position
-    self.size = args.size
-    self.rotation = args.rotation
+    self.position = lovr.math.vec3(unpack(args.position))
+    self.size = lovr.math.vec3(unpack(args.size))
+    self.rotation = lovr.math.newQuat(unpack(args.rotation))
 
     self:_compute_draw_args()
 end
 
 function Window:_compute_draw_args()
-    self._draw_args = util.table_concat({
-        self.position, self.size, self.rotation,
-    })
+    self._draw_args = lovr.math.newMat4(self.position, self.size, self.rotation)
 end
 
 function Window:draw(pass)
     pass:setColor(1, 1, 1, 1)
-    pass:plane(unpack(self._draw_args))
+    pass:plane(self._draw_args)
 end
 
 return Window

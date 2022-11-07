@@ -10,14 +10,14 @@ ctx = {controllers = {left = Controller("left"), right = Controller("right")}}
 ctx.windows = {
     screen_1 = Window({
         position = {0, 1.5, -3},
-        size = {3.55, 2},
+        size = {3.55, 2, 1},
         rotation = {math.pi, 1, 0, 0},
     }),
-    screen_2 = Window({
-        position = {3, 2, -3},
-        size = {2.24, 4},
-        rotation = {math.pi, 1, 0, 0},
-    }),
+    --screen_2 = Window({
+    --    position = {3, 2, -3},
+    --    size = {2.24, 4},
+    --    rotation = {math.pi, 1, 0, 0},
+    --}),
 }
 
 ctx.floor = Floor()
