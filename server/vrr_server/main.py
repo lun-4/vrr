@@ -34,53 +34,14 @@ async def setup_frame_sending(width, height):
         f"ffmpeg -video_size 1080x1920 -framerate 30 -f x11grab -i :0.0+1366,0 {ffmpeg_params} -f rtsp -rtsp_transport udp rtsp://localhost:8554/screen_2.sdp",
     )
 
-    ffmpeg_cmdlines = (
-        f"ffmpeg -framerate 30 -f x11grab -i :0.0 {ffmpeg_params} -f rtsp -rtsp_transport udp rtsp://localhost:8554/screen.sdp",
-    )
     print("ffmpeg cmd", ffmpeg_cmdlines)
 
     processes = []
 
     for cmdline in ffmpeg_cmdlines:
-        processes.append(
-            await asyncio.create_subprocess_shell(
-                cmdline,
-            )
-        )
+        processes.append(await asyncio.create_subprocess_shell(cmdline))
 
-    return StreamContext(
-        processes,
-        width,
-        height,
-    )
-
-
-def write_bytes_to_file(fd, image):
-    e = _getencoder(image.mode, encoder_name="raw", args=image.mode)
-    e.setimage(image.im)
-    l, s, d = e.encode(image.width * image.height * 4)
-    fd.write(d)
-    if s < 0:
-        raise RuntimeError(f"encoder error {s} in tobytes")
-
-
-async def capture_frame(ctx) -> bytes:
-    img = ImageGrab.grab()
-    print("tick", img.mode, ctx.tick)
-    write_bytes_to_file(ctx.process.stdin, img)
-    await ctx.process.stdin.drain()
-
-    # read the full h264 thing we want
-    out_bytes = b""
-    while True:
-        print("read...")
-        chunk = await ctx.process.stdout.read(4096)
-        print("chunk", chunk)
-        if not chunk:
-            break
-        out_bytes += chunk
-
-    return out_bytes
+    return StreamContext(processes, width, height)
 
 
 async def amain():
