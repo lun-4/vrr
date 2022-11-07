@@ -21,7 +21,6 @@ function Window:_compute_draw_args()
 end
 
 function Window:draw(pass)
-    pass:setShader()
     pass:setColor(1, 1, 1, 1)
     pass:plane(unpack(self._draw_args))
 end

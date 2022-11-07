@@ -30,6 +30,7 @@ function lovr.load()
         print("logs were unable to be loaded")
         lovr.event.quit(1)
     end
+    ctx.log = loglib.Logger:new("main")
 
     ctx.controllers.left:onLoad()
     ctx.controllers.right:onLoad()
@@ -38,8 +39,9 @@ function lovr.load()
     ctx.texture_1 = lovr.graphics.newTexture(ctx.image_1, {
         type = '2d',
         stereo = false,
-        mipmaps = true,
-        label = 'screen 1 texture'
+        mipmaps = false,
+        label = 'screen 1 texture',
+        usage = {'sample', 'transfer'},
     })
 
     ctx.image_2 = lovr.data.newImage(1366, 768, "rgba8")
@@ -102,6 +104,10 @@ function lovr.update()
     --for _, controller in pairs(ctx.controllers) do
     --    controller:onUpdate()
     --end
+    --local encoded_png = ctx.image_1:encode()
+    --ctx.log:info("encoded", encoded_png:getSize())
+    --local bytes = lovr.filesystem.write("frame.png", encoded_png)
+    --ctx.log:info("wrote", bytes)
 end
 
 function lovr.draw(pass)
@@ -110,15 +116,19 @@ function lovr.draw(pass)
     -- for each screen, we need to replacePixels
     pass:setShader()
 
-    pass:setMaterial(ctx.image_1)
+    local tx = lovr.graphics.getPass('transfer')
+    tx:copy(ctx.image_1, ctx.texture_1)
+    pass:setMaterial(ctx.texture_1)
     ctx.windows.screen_1:draw(pass)
 
-    pass:setMaterial(ctx.image_2)
-    ctx.windows.screen_2:draw(pass)
+    --pass:setMaterial(ctx.image_2)
+    --ctx.windows.screen_2:draw(pass)
 
     for _, controller in pairs(ctx.controllers) do
         controller:draw(pass)
     end
+
+    return lovr.graphics.submit(tx, pass)
 end
 
 function lovr.log(message, level, tag)

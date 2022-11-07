@@ -30,4 +30,6 @@ out_channel:push("waiting")
 local stream = rtsp.open(rtsp_url)
 out_channel:push("ok")
 
-rtsp.frameLoop(stream, image:getBlob():getPointer())
+local blob = image:getBlob()
+log:info("blob size %d", blob:getSize())
+rtsp.frameLoop(stream, blob:getPointer(), blob:getSize())
