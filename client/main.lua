@@ -93,8 +93,8 @@ function lovr.load()
         ctx.screen_1_in:push("rtsp://127.0.0.1:8554/screen_1.sdp")
         ctx.screen_1_in:push(ctx.image_1)
 
-        ctx.screen_2_in:push("rtsp://127.0.0.1:8554/screen_2.sdp")
-        ctx.screen_2_in:push(ctx.image_2)
+        --ctx.screen_2_in:push("rtsp://127.0.0.1:8554/screen_2.sdp")
+        --ctx.screen_2_in:push(ctx.image_2)
     end
 end
 
@@ -105,7 +105,6 @@ function lovr.update()
 end
 
 function lovr.draw(pass)
-    print('draw',pass)
     ctx.floor:draw(pass)
 
     -- for each screen, we need to replacePixels
