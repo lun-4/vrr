@@ -16,7 +16,7 @@ function Controller:onLoad()
             "quest2_" .. self.hand .. "_hand.glb")
     end
 
-    self.shader = lovr.graphics.newShader("standard", {})
+    self.shader = lovr.graphics.newShader("unlit", {})
 end
 
 function Controller:newPosition(new_vec3_table)
@@ -88,7 +88,7 @@ function Controller:draw(pass)
     -- (which could be updated by the time we want to draw the frame!)
     if self.model then
         pass:setColor(1, 1, 1, 1)
-        self.model:draw(mat4(lovr.headset.getPose(self.hand)))
+        pass:draw(self.model, mat4(lovr.headset.getPose(self.hand)))
     else
         local position = vec3(lovr.headset.getPosition(self.hand))
         local direction =
