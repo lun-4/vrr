@@ -38,8 +38,8 @@ end
 
 function Floor:draw(pass)
     pass:setShader(self.shader)
-    pass:plane(0, 0, 0, 25, 25, -math.pi / 2)
-
+    local rotation = quat(-math.pi / 2, 1, 0, 0)
+    pass:plane(mat4(vec3(1, 1, 1), vec3(25, 25, 25), rotation))
 end
 
 return Floor
