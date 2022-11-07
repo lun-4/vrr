@@ -16,7 +16,9 @@ local lovr = {
     filesystem = require "lovr.filesystem",
 }
 
-local rtsp = require "rtsp2"
+local rtsp = require "rtsp"
+
+print(rtsp)
 
 local in_channel = lovr.thread.getChannel(thread_id .. "_in")
 local out_channel = lovr.thread.getChannel(thread_id .. "_out")

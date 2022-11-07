@@ -1,3 +1,4 @@
+print('hello')
 -- local socket = require("socket")
 local lovr = require("lovr")
 local loglib = require("log")
@@ -6,6 +7,7 @@ local Window = require "window"
 local Floor = require "floor"
 local Controller = require "controller"
 
+print('sex')
 ctx = {controllers = {left = Controller("left"), right = Controller("right")}}
 
 ctx.windows = {
@@ -26,16 +28,20 @@ ctx.windows = {
     }),
 }
 
-ctx.floor = Floor()
+--ctx.floor = Floor()
 
 new_method = true
 
+print('hello')
 function lovr.load()
+    print('load time')
     local log_thread = loglib.startLogThread()
     if log_thread == nil then
         print("logs were unable to be loaded")
         lovr.event.quit(1)
     end
+    print('load time2')
+                                       print('aaa')
 
     ctx.controllers.left:onLoad()
     ctx.controllers.right:onLoad()
@@ -50,7 +56,7 @@ function lovr.load()
     ctx.material_1 = lovr.graphics.newMaterial(ctx.canvas_1:getTexture(), 1, 1,
                                                1, 1)
 
-    ctx.canvas_2 = lovr.graphics.newCanvas(1080, 1920, {
+    ctx.canvas_2 = lovr.graphics.newCanvas(800, 300, {
         format = "rgb",
         stereo = false,
         mipmaps = true,
@@ -60,7 +66,7 @@ function lovr.load()
     ctx.material_2 = lovr.graphics.newMaterial(ctx.canvas_2:getTexture(), 1, 1,
                                                1, 1)
 
-    ctx.canvas_3 = lovr.graphics.newCanvas(2446, 1920, {
+    ctx.canvas_3 = lovr.graphics.newCanvas(1280, 496, {
         format = "rgb",
         stereo = false,
         mipmaps = true,
@@ -69,6 +75,7 @@ function lovr.load()
     ctx.image_3 = ctx.canvas_3:newImage()
     ctx.material_3 = lovr.graphics.newMaterial(ctx.canvas_3:getTexture(), 1, 1,
                                                1, 1)
+                                       print('aaa')
 
     if new_method then
         local coordinator_channel = lovr.thread.getChannel("coordinator")
@@ -85,8 +92,10 @@ function lovr.load()
         ctx.in_channel = lovr.thread.getChannel("media_in")
         ctx.out_channel = lovr.thread.getChannel("media_out")
 
-        ctx.in_channel:push("rtsp://192.168.0.237:8554/screen.sdp")
-        ctx.in_channel:push("0,0,1366,768;1366,0,1080,1920;ALL")
+        -- ctx.in_channel:push("rtsp://192.168.0.237:8554/screen.sdp")
+        ctx.in_channel:push("/home/luna/woob_tokyo_run.mp4")
+        -- ctx.in_channel:push("0,0,1366,768;1366,0,1080,1920;ALL")
+        ctx.in_channel:push("0,0,800,300;800,800,1280,300;ALL")
         ctx.in_channel:push(ctx.image_1)
         ctx.in_channel:push(ctx.image_2)
         ctx.in_channel:push(ctx.image_3) -- holds it for debugging
@@ -122,24 +131,28 @@ function lovr.update()
     end
 end
 
-function lovr.draw()
-    ctx.floor:draw()
+function lovr.draw(pass)
+    print('draw',pass)
+    --ctx.floor:draw(pass)
 
     -- for each screen, we need to replacePixels
-    lovr.graphics.setShader()
+    pass:setShader()
+
     ctx.canvas_1:getTexture():replacePixels(ctx.image_1)
-    ctx.windows.screen_1:draw(ctx.material_1)
+    pass:setMaterial(ctx.material_1)
+    ctx.windows.screen_1:draw(pass)
 
     ctx.canvas_2:getTexture():replacePixels(ctx.image_2)
-    ctx.windows.screen_2:draw(ctx.material_2)
+    pass:setMaterial(ctx.material_2)
+    ctx.windows.screen_2:draw(pass)
 
     ctx.canvas_3:getTexture():replacePixels(ctx.image_3)
-    ctx.windows.screen_3:draw(ctx.material_3)
-
+    pass:setMaterial(ctx.material_3)
+    ctx.windows.screen_3:draw(pass)
     -- lovr.graphics.plane(ctx.material_2, 1.56, 1.4, -2, 1.125, 2, math.pi, 1, 0, 0)
 
     for _, controller in pairs(ctx.controllers) do
-        controller:draw()
+        controller:draw(pass)
     end
 end
 

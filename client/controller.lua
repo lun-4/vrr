@@ -77,28 +77,28 @@ function Controller:onUpdate(dt)
     end
 end
 
-function Controller:draw()
+function Controller:draw(pass)
     if not self.active then
         return
     end
 
-    lovr.graphics.setShader(self.shader)
+    pass:setShader(self.shader)
 
     -- draw the true position given by headset, instead of last_position
     -- (which could be updated by the time we want to draw the frame!)
     if self.model then
-        lovr.graphics.setColor(1, 1, 1, 1)
+        pass:setColor(1, 1, 1, 1)
         self.model:draw(mat4(lovr.headset.getPose(self.hand)))
     else
         local position = vec3(lovr.headset.getPosition(self.hand))
         local direction =
             quat(lovr.headset.getOrientation(self.hand)):direction()
 
-        lovr.graphics.setColor(1, 1, 1)
-        lovr.graphics.sphere(position, .01)
+        pass:setColor(1, 1, 1)
+        pass:sphere(position, .01)
 
-        lovr.graphics.setColor(1, 0, 0)
-        lovr.graphics.line(position, position + direction * 50)
+        pass:setColor(1, 0, 0)
+        pass:line(position, position + direction * 50)
     end
 end
 
