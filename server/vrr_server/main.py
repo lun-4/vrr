@@ -1,11 +1,8 @@
 import socket
 import asyncio
 import ffmpeg
-from PIL import ImageGrab
-from PIL.Image import _getencoder
 from dataclasses import dataclass
 from typing import List, Any
-import numpy as np
 
 
 class OpCode:
@@ -47,10 +44,10 @@ async def setup_frame_sending(width, height):
 async def amain():
     ctx = await setup_frame_sending(-1, -1)
     try:
-        coros = []
+        tasks = []
         for proc in ctx.processes:
-            coros.append(proc.wait())
-        await asyncio.wait(coros)
+            tasks.append(asyncio.create_task(proc.wait()))
+        await asyncio.wait(tasks)
     finally:
         for proc in ctx.processes:
             await proc.kill()
