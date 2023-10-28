@@ -49,7 +49,7 @@ function lovr.load()
         type = '2d',
         stereo = false,
         mipmaps = true,
-        label = 'screen 1 texture'
+        label = 'screen 2 texture'
     })
 
     if new_method then
@@ -116,8 +116,7 @@ function lovr.draw(pass)
     -- for each screen, we need to replacePixels
     pass:setShader()
 
-    local tx = lovr.graphics.getPass('transfer')
-    tx:copy(ctx.image_1, ctx.texture_1)
+    ctx.texture_1:setPixels(ctx.image_1)
     pass:setMaterial(ctx.texture_1)
     ctx.windows.screen_1:draw(pass)
 
@@ -127,8 +126,6 @@ function lovr.draw(pass)
     for _, controller in pairs(ctx.controllers) do
         controller:draw(pass)
     end
-
-    return lovr.graphics.submit(tx, pass)
 end
 
 function lovr.log(message, level, tag)
